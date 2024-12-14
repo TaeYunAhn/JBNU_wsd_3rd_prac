@@ -1,0 +1,694 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Job API",
+    "description": "Job recruitment API with user, jobs, applications, bookmarks and more.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "OAuth2PasswordBearer": {
+        "type": "oauth2",
+        "flows": {
+          "password": {
+            "tokenUrl": "/auth/login",
+            "scopes": {}
+          }
+        }
+      }
+    },
+    "schemas": {
+      "UserRegister": {
+        "type": "object",
+        "required": [
+          "email",
+          "password",
+          "name"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "birth_date": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "ProfileUpdate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "birth_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "current_password": {
+            "type": "string"
+          },
+          "new_password": {
+            "type": "string"
+          }
+        }
+      },
+      "Token": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string"
+          },
+          "refresh_token": {
+            "type": "string"
+          },
+          "token_type": {
+            "type": "string"
+          }
+        }
+      },
+      "RefreshToken": {
+        "type": "object",
+        "required": [
+          "refresh_token"
+        ],
+        "properties": {
+          "refresh_token": {
+            "type": "string"
+          }
+        }
+      },
+      "JobCreate": {
+        "type": "object",
+        "required": [
+          "company_id",
+          "title",
+          "job_description"
+        ],
+        "properties": {
+          "company_id": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "job_description": {
+            "type": "string"
+          },
+          "experience_level": {
+            "type": "string"
+          },
+          "education_level": {
+            "type": "string"
+          },
+          "employment_type": {
+            "type": "string"
+          },
+          "salary_info": {
+            "type": "string"
+          },
+          "location": {
+            "type": "object",
+            "properties": {
+              "city": {
+                "type": "string"
+              },
+              "district": {
+                "type": "string"
+              }
+            }
+          },
+          "deadline_date": {
+            "type": "string"
+          },
+          "tech_stacks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "job_categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Register a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRegister"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Token"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "Email address"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password"
+                  }
+                },
+                "required": [
+                  "username",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Token"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Refresh access token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshToken"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token refreshed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Token"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/profile": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Get user profile",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Update user profile",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully"
+          }
+        }
+      }
+    },
+    "/jobs": {
+      "get": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "List all jobs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "keyword",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search keyword"
+          },
+          {
+            "in": "query",
+            "name": "company",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Company name"
+          },
+          {
+            "in": "query",
+            "name": "employment_type",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Employment type"
+          },
+          {
+            "in": "query",
+            "name": "location_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Location ID"
+          },
+          {
+            "in": "query",
+            "name": "salary_info",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Salary information"
+          },
+          {
+            "in": "query",
+            "name": "experience_level",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Experience level"
+          },
+          {
+            "in": "query",
+            "name": "sort_field",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "created_at",
+                "view_count",
+                "deadline_date",
+                "title"
+              ]
+            },
+            "description": "Field to sort by"
+          },
+          {
+            "in": "query",
+            "name": "sort_order",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "description": "Sort order"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Page number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of jobs"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Create a new job posting",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Job created successfully"
+          }
+        }
+      }
+    },
+    "/jobs/{id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Get job details",
+        "responses": {
+          "200": {
+            "description": "Job details"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Update job posting",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Job updated successfully"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Delete job posting",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job deleted successfully"
+          }
+        }
+      }
+    },
+    "/applications": {
+      "get": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "List user applications",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status_filter",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "reviewed",
+                "accepted",
+                "rejected"
+              ]
+            },
+            "description": "Filter by status"
+          },
+          {
+            "in": "query",
+            "name": "sort_by_date",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "description": "Sort by date"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Page number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of applications"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "Apply for a job",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "posting_id": {
+                    "type": "integer"
+                  },
+                  "resume_id": {
+                    "type": "integer"
+                  },
+                  "resume_file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "posting_id"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Application submitted successfully"
+          }
+        }
+      }
+    },
+    "/applications/{id}": {
+      "delete": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "Cancel application",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Application cancelled successfully"
+          }
+        }
+      }
+    },
+    "/bookmarks": {
+      "get": {
+        "tags": [
+          "bookmarks"
+        ],
+        "summary": "List user bookmarks",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Page number"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "description": "Sort order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of bookmarks"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "bookmarks"
+        ],
+        "summary": "Toggle bookmark",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "posting_id"
+                ],
+                "properties": {
+                  "posting_id": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bookmark toggled successfully"
+          }
+        }
+      }
+    }
+  }
+}
+
